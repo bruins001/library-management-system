@@ -70,4 +70,8 @@ class LibraryController extends Controller
     function listAvailableBooks(): JsonResponse {
         return response()->json(['status' => 'success', 'data' => Book::where('status', '=', 'available')->get()], 200);
     }
+
+    function listBorrowedBooks(): JsonResponse {
+        return response()->json(['status' => 'success', 'data' => Book::where('status', '=', 'borrowed')->get()], 200);
+    }
 }
