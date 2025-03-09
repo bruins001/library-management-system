@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Library;
 use App\Models\Member;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,5 +79,40 @@ class LibraryController extends Controller
      */
     function listBorrowedBooks(): JsonResponse {
         return response()->json(['status' => 'success', 'data' => Book::where('status', '=', 'borrowed')->get()], 200);
+    }
+
+    /**
+     * Request should have a memberName and a isbn.
+     * Server lets the member borrow a book if it isn't borrowed jet and returns a response to the user.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    function borrowBook(Request $request): JsonResponse {
+        $validator = Validator::make($request->all(), [
+            'memberName' => 'required|string|exists:members,name',
+            'isbn' => 'required|string|max:13|min:13|exists:books,isbn',
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(['status' => 'error', 'error' => $validator->errors()], 400);
+        }
+
+        $book = Book::where('isbn', '=', $request->input('isbn'))->first();
+
+        if ($book->status !== 'available') {
+            return response()->json(['status' => 'error', 'error' => 'Book is not available'], 400);
+        }
+
+        $book->status = 'borrowed';
+        $book->save();
+
+        $libraryItem = new Library();
+        $libraryItem->book_id = $book->id;
+        $libraryItem->member_id = Member::where('name', '=', strtolower($request->input('memberName')))->first()->id;
+        $libraryItem->save();
+
+
+        return  response()->json(['status' => 'success', 'message' => 'You have borrowed the book.', 'data' => $book], 200);
     }
 }
