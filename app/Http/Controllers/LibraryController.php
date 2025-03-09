@@ -115,4 +115,32 @@ class LibraryController extends Controller
 
         return  response()->json(['status' => 'success', 'message' => 'You have borrowed the book.', 'data' => $book], 200);
     }
+
+    /**
+     * Request should have a memberName and a isbn.
+     * The user should always be able to return the book even if the database says it's not borrowed.
+     * Server returns a response to the user.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    function returnBook(Request $request): JsonResponse {
+        $validator = Validator::make($request->all(), [
+            'memberName' => 'required|string|exists:members,name',
+            'isbn' => 'required|string|max:13|min:13|exists:books,isbn',
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(['status' => 'error', 'error' => $validator->errors()], 400);
+        }
+
+        $book = Book::where('isbn', '=', $request->input('isbn'))->first();
+        $book->status = 'available';
+        $book->save();
+
+        $member = Member::where('name', '=', strtolower($request->input('memberName')))->first();
+        Library::where('book_id', '=', $book->id)->where('member_id', '=', $member->id)->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Book has been returned.', 'data' => $book], 200);
+    }
 }

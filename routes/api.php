@@ -8,3 +8,4 @@ Route::post('member', [LibraryController::class, 'addMember']);
 Route::get('books/available', [LibraryController::class, 'listAvailableBooks']);
 Route::get('books/borrowed', [LibraryController::class, 'listBorrowedBooks']);
 Route::put('books/borrow', [LibraryController::class, 'borrowBook']);
+Route::put('books/return', [LibraryController::class, 'returnBook']);
