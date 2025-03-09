@@ -38,6 +38,12 @@ class LibraryController extends Controller
         return response()->json(['status' => 'success', 'data' => $book], 201);
     }
 
+    /**
+     * Add a member to the database and returns a response to the user.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     function addMember(Request $request): JsonResponse {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:members,name',
