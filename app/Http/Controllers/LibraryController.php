@@ -62,6 +62,11 @@ class LibraryController extends Controller
         return response()->json(['status' => 'success', 'data' => $member], 201);
     }
 
+    /**
+     * Lists available books.
+     *
+     * @return JsonResponse
+     */
     function listAvailableBooks(): JsonResponse {
         return response()->json(['status' => 'success', 'data' => Book::where('status', '=', 'available')->get()], 200);
     }
